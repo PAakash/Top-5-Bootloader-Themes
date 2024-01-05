@@ -10,8 +10,8 @@
 # * @link    https://youtu.be/BAyzHP1Cqb0
 # */
 
-#THEME_DIR='/usr/share/grub/themes'
-THEME_DIR='/boot/grub/themes'
+THEME_DIR='/usr/share/grub/themes'
+#THEME_DIR='/boot/grub/themes'
 THEME_NAME=''
 
 function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
@@ -48,11 +48,14 @@ function check_root() {
 }
 
 function select_theme() {
-    themes=('Vimix' 'Cyberpunk' 'Shodan' 'fallout' 'CyberRe' 'minegrub-theme' 'Quit')
+    themes=('Tela' 'Vimix' 'Cyberpunk' 'Shodan' 'fallout' 'CyberRe' 'minegrub-theme' 'Quit')
 
     PS3=$(echo_prompt '\nChoose The Theme You Want: ')
     select THEME_NAME in "${themes[@]}"; do
         case "${THEME_NAME}" in
+	    'Tela')
+		splash 'Installing Tela theme'
+		break;;
             'Vimix')
                 splash 'Installing Vimix Theme...'
                 break;;
@@ -87,16 +90,20 @@ function backup() {
 
 function install_theme() {
     # create themes directory if not exists
+    echo_primary "Installing ${THEME_NAME} theme..."
+
     if [[ ! -d "${THEME_DIR}/${THEME_NAME}" ]]; then
         # Copy theme
-        echo_primary "Installing ${THEME_NAME} theme..."
-
-        echo_info "mkdir -p \"${THEME_DIR}/${THEME_NAME}\""
-        mkdir -p "${THEME_DIR}/${THEME_NAME}"
-
-        echo_info "cp -a ./themes/\"${THEME_NAME}\"/* \"${THEME_DIR}/${THEME_NAME}\""
-        cp -a ./themes/"${THEME_NAME}"/* "${THEME_DIR}/${THEME_NAME}"
+	echo 'Current theme not installed yet'
+    else
+    
+	rm -rf "${THEME_DIR}/${THEME_NAME}"
     fi
+
+    echo_info "mkdir -p \"${THEME_DIR}/${THEME_NAME}\""
+    mkdir -p "${THEME_DIR}/${THEME_NAME}"
+    echo_info "cp -a ./themes/\"${THEME_NAME}\"/* \"${THEME_DIR}/${THEME_NAME}\""
+    cp -a ./themes/"${THEME_NAME}"/* "${THEME_DIR}/${THEME_NAME}"
 }
 
 function config_grub() {
@@ -110,13 +117,13 @@ function config_grub() {
 
     #--------------------------------------------------
 
-    echo_primary 'Setting grub timeout to 60 seconds'
+    echo_primary 'Setting grub timeout to 30 seconds'
     # remove default timeout if any
     echo_info "sed -i '/GRUB_TIMEOUT=/d' /etc/default/grub"
     sed -i '/GRUB_TIMEOUT=/d' /etc/default/grub
 
-    echo_info "echo 'GRUB_TIMEOUT=\"60\"' >> /etc/default/grub"
-    echo 'GRUB_TIMEOUT="60"' >> /etc/default/grub
+    echo_info "echo 'GRUB_TIMEOUT=\"30\"' >> /etc/default/grub"
+    echo 'GRUB_TIMEOUT="30"' >> /etc/default/grub
 
     #--------------------------------------------------
 
@@ -137,6 +144,8 @@ function config_grub() {
 
     echo_info "echo 'GRUB_GFXMODE=\"auto\"' >> /etc/default/grub"
     echo 'GRUB_GFXMODE="auto"' >> /etc/default/grub   
+
+
 }
 
 function update_grub() {
@@ -152,8 +161,8 @@ function update_grub() {
 
     elif [[ -x "$(command -v grub2-mkconfig)" ]]; then
         if [[ -x "$(command -v zypper)" ]]; then
-            echo_info 'grub2-mkconfig -o /boot/grub2/grub.cfg'
-            grub2-mkconfig -o /boot/grub2/grub.cfg
+            echo_info 'grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg'
+            grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 
         elif [[ -x "$(command -v dnf)" ]]; then
             echo_info 'grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg'
